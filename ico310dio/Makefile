@@ -1,9 +1,8 @@
-_VERSION:=$(shell uname -r | cut -c1-3 | sed 's/2\.[56]/2\.6/')
+K_VERSION:=$(shell uname -r | cut -c1-3 | sed 's/2\.[56]/2\.6/')
 LBITS := $(shell getconf LONG_BIT)
-param_64 :=
+LIB_PATH=/usr/lib64/
 ifeq ($(LBITS),64)
   lib_dir32_64=64
-  param_64 := -fPIC
   ifeq "$(wildcard $(LIB_PATH))" ""
         LIB_PATH=/usr/lib/
   else
@@ -20,33 +19,15 @@ else
   lib_dir := 2.6.x
 endif
 
-all: hwm wdt dio comport
 
-# Compiler
-CC = cc
 
-# Include files
+all:    
+	cp ./lib/$(lib_dir)/$(lib_dir32_64)/libaxio.so.1.0.0 $(LIB_PATH) ; \
+	cd $(LIB_PATH) ; \
+	ln -s libaxio.so.1.0.0 libaxio.so.0 ; \
+	ln -s libaxio.so.0 libaxio.so
 
-# libs
-LIB = axio 
-
-# Include libs
-INCLUDE_LIB = $(LIB_PATH)
-
-# Options for development
-CFLAGS = -Wall
-
-hwm:hwm.c
-	$(CC) $(CFLAGS) -o hwm hwm.c -l$(LIB) -L$(INCLUDE_LIB)
-
-wdt:wdt.c
-	$(CC) $(CFLAGS) -o wdt wdt.c -l$(LIB) -L$(INCLUDE_LIB)
-
-dio:dio.c
-	$(CC) $(CFLAGS) -o dio dio.c -l$(LIB) -L$(INCLUDE_LIB)
-
-comport:comport.c
-	$(CC) $(CFLAGS) -o comport comport.c
-	
 clean:
-	rm -f hwm wdt dio comport
+	cd $(LIB_PATH) ; \
+	rm -f libaxio.*
+
